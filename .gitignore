@@ -1,6 +1,5 @@
 # Model & data files (not versioned)
 model_data.pkl
-student-mat.csv
 
 # Python
 __pycache__/

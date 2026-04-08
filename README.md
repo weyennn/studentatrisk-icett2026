@@ -1,4 +1,4 @@
-# EarlyGuard — ICETT 2026
+# StudentAtRisk — ICETT 2026
 
 **Intelligent Two-Stage Ensemble Framework for Early Detection and Intervention of At-Risk Students**
 
@@ -8,7 +8,7 @@ Universitas Gadjah Mada · ICETT 2026
 
 ## Overview
 
-EarlyGuard implements a two-stage prediction pipeline to identify students at risk of academic failure, balancing early detection with prediction accuracy.
+StudentAtRisk implements a two-stage prediction pipeline to identify students at risk of academic failure, balancing early detection with prediction accuracy.
 
 | Stage | Model | Features | Objective |
 |-------|-------|----------|-----------|
@@ -22,7 +22,7 @@ EarlyGuard implements a two-stage prediction pipeline to identify students at ri
 ## Project Structure
 
 ```
-earlyguard/
+StudentAtRisk/
 ├── app.py                    # Streamlit entry point (multi-page)
 ├── train.py                  # Model training script → produces model_data.pkl
 ├── requirements.txt
