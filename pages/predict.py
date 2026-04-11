@@ -121,8 +121,6 @@ with st.form("student_form"):
 
     c10, c11, c12 = st.columns(3)
     with c10:
-        school  = st.selectbox("School", ["GP", "MS"])
-        st.markdown('<div class="field-note">GP = Gabriel Pereira, MS = Mousinho da Silveira — both Portuguese secondary schools in the UCI dataset.</div>', unsafe_allow_html=True)
         address = st.selectbox("Home address type", ["U", "R"],
                                format_func=lambda x: {"U": "Urban", "R": "Rural"}[x])
         st.markdown('<div class="field-note">Urban = better access to learning resources and shorter commute to school.</div>', unsafe_allow_html=True)
@@ -188,7 +186,7 @@ with st.form("student_form"):
 # ═══════════════════════════════════════════════════════════════════════════════
 if submitted:
     raw = dict(
-        school=school, sex=sex, age=age, address=address, famsize=famsize,
+        sex=sex, age=age, address=address, famsize=famsize,
         Pstatus=Pstatus, Medu=Medu, Fedu=Fedu, Mjob=Mjob, Fjob=Fjob,
         reason=reason, guardian=guardian, traveltime=traveltime,
         studytime=studytime, failures=failures, schoolsup=schoolsup,

@@ -4,6 +4,7 @@ pages/about.py
 Framework overview, methodology, and authors page.
 """
 
+import os
 import streamlit as st
 import plotly.graph_objects as go
 from config.constants import (
@@ -14,11 +15,24 @@ from config.constants import (
     FEATURE_LABELS,
 )
 
+_ASSETS     = os.path.join(os.path.dirname(__file__), "..", "assets")
+_LOGO_UGM   = os.path.join(_ASSETS, "Logo-Tengah-Stack-Up-1.jpg")
+_LOGO_ICETT = os.path.join(_ASSETS, "logo icett.png")
+
 _FONT = "DM Sans, system-ui, sans-serif"
 _BG   = "rgba(0,0,0,0)"
 _GRID = "#f1f5f9"
 _TEXT = "#374151"
 _MUTED = "#94a3b8"
+
+# ── Institutional logos ───────────────────────────────────────────────────────
+_lpad, _lugm, _gap, _licett, _rpad = st.columns([2, 1.5, 0.5, 1.5, 2])
+with _lugm:
+    if os.path.exists(_LOGO_UGM):
+        st.image(_LOGO_UGM, use_container_width=True)
+with _licett:
+    if os.path.exists(_LOGO_ICETT):
+        st.image(_LOGO_ICETT, use_container_width=True)
 
 # ── Page header ───────────────────────────────────────────────────────────────
 st.markdown("""
@@ -39,69 +53,91 @@ st.markdown("""
 # ═══════════════════════════════════════════════════════════════════════════════
 st.markdown('<div class="section-label">Detection pipeline</div>', unsafe_allow_html=True)
 
-st.markdown("""
-<div style="display:flex;align-items:stretch;gap:0;overflow-x:auto;padding-bottom:0.25rem;">
+_p1, _a1, _p2, _a2, _p3, _a3, _p4, _a4, _p5 = st.columns([3, 0.6, 3.5, 0.6, 2.5, 0.6, 3.5, 0.6, 3])
 
-  <!-- Input -->
-  <div style="flex:1;min-width:100px;background:#f8fafc;border:1px solid #e2e8f0;
-              border-radius:12px 0 0 12px;padding:1rem 1rem;text-align:center;">
-    <div style="font-size:1.25rem;margin-bottom:6px;">&#128196;</div>
-    <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#94a3b8;margin-bottom:4px;">Input</div>
-    <div style="font-size:0.78rem;font-weight:600;color:#0f172a;">Student Data</div>
-    <div style="font-size:0.68rem;color:#94a3b8;margin-top:3px;">33 features</div>
-  </div>
+with _p1:
+    st.markdown("""
+    <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;
+                padding:1.25rem 1rem;text-align:center;height:100%;">
+      <div style="font-size:0.65rem;font-weight:800;text-transform:uppercase;
+                  letter-spacing:0.1em;color:#94a3b8;margin-bottom:6px;">Input</div>
+      <div style="font-size:0.9rem;font-weight:700;color:#0f172a;margin-bottom:4px;">Student Data</div>
+      <div style="font-size:0.72rem;color:#64748b;line-height:1.6;">33 features<br>Demographics<br>Academic records</div>
+    </div>""", unsafe_allow_html=True)
 
-  <!-- Arrow -->
-  <div style="display:flex;align-items:center;padding:0 4px;color:#c7d2fe;font-size:1.4rem;flex-shrink:0;">&#8250;</div>
+with _a1:
+    st.markdown("""
+    <div style="display:flex;align-items:center;justify-content:center;height:100%;
+                font-size:1.6rem;color:#c7d2fe;padding-top:0.5rem;">&#10142;</div>
+    """, unsafe_allow_html=True)
 
-  <!-- Stage 1 -->
-  <div style="flex:1.4;min-width:130px;background:linear-gradient(135deg,#eff6ff,#eef2ff);
-              border:1px solid #c7d2fe;border-left:3px solid #4f46e5;padding:1rem 1rem;text-align:center;">
-    <div style="font-size:0.62rem;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;
-                color:#4f46e5;margin-bottom:5px;">Stage 1</div>
-    <div style="font-size:0.82rem;font-weight:700;color:#0f172a;margin-bottom:4px;">Early Screening</div>
-    <div style="font-size:0.7rem;color:#6366f1;font-weight:500;margin-bottom:6px;">Logistic Regression</div>
-    <div style="font-size:0.67rem;color:#64748b;line-height:1.5;">G1 + demographics<br>+ behaviour<br>threshold p &ge; 0.20</div>
-  </div>
+with _p2:
+    st.markdown("""
+    <div style="background:linear-gradient(135deg,#eff6ff,#eef2ff);border:1px solid #c7d2fe;
+                border-top:3px solid #4f46e5;border-radius:14px;padding:1.25rem 1rem;text-align:center;height:100%;">
+      <div style="font-size:0.65rem;font-weight:800;text-transform:uppercase;
+                  letter-spacing:0.12em;color:#4f46e5;margin-bottom:6px;">Stage 1</div>
+      <div style="font-size:0.9rem;font-weight:700;color:#0f172a;margin-bottom:4px;">Early Screening</div>
+      <div style="font-size:0.75rem;color:#6366f1;font-weight:600;margin-bottom:8px;">Logistic Regression</div>
+      <div style="font-size:0.71rem;color:#64748b;line-height:1.65;">G1 + demographics<br>+ behaviour<br>
+        <span style="background:#e0e7ff;color:#4338ca;padding:1px 6px;border-radius:4px;
+                     font-weight:600;font-size:0.68rem;">threshold p &ge; 0.20</span>
+      </div>
+    </div>""", unsafe_allow_html=True)
 
-  <!-- Decision -->
-  <div style="display:flex;align-items:center;padding:0 4px;color:#c7d2fe;font-size:1.4rem;flex-shrink:0;">&#8250;</div>
-  <div style="flex:0.9;min-width:90px;background:linear-gradient(135deg,#fffbeb,#fef9c3);
-              border:1px solid #fde68a;border-left:3px solid #d97706;padding:1rem 0.75rem;text-align:center;
-              display:flex;flex-direction:column;align-items:center;justify-content:center;">
-    <div style="font-size:0.68rem;font-weight:700;color:#d97706;text-transform:uppercase;letter-spacing:0.08em;">Gate</div>
-    <div style="font-size:0.75rem;font-weight:600;color:#0f172a;margin-top:3px;">Flagged?</div>
-    <div style="font-size:0.65rem;color:#92400e;margin-top:4px;">p &ge; 0.20<br>→ proceed</div>
-  </div>
+with _a2:
+    st.markdown("""
+    <div style="display:flex;align-items:center;justify-content:center;height:100%;
+                font-size:1.6rem;color:#c7d2fe;padding-top:0.5rem;">&#10142;</div>
+    """, unsafe_allow_html=True)
 
-  <!-- Arrow -->
-  <div style="display:flex;align-items:center;padding:0 4px;color:#c7d2fe;font-size:1.4rem;flex-shrink:0;">&#8250;</div>
+with _p3:
+    st.markdown("""
+    <div style="background:linear-gradient(135deg,#fffbeb,#fef3c7);border:1px solid #fde68a;
+                border-top:3px solid #d97706;border-radius:14px;padding:1.25rem 0.75rem;text-align:center;height:100%;">
+      <div style="font-size:0.65rem;font-weight:800;text-transform:uppercase;
+                  letter-spacing:0.1em;color:#d97706;margin-bottom:4px;">Gate</div>
+      <div style="font-size:0.88rem;font-weight:700;color:#0f172a;">Flagged?</div>
+      <div style="font-size:0.7rem;color:#92400e;margin-top:6px;line-height:1.6;">
+        p &ge; 0.20<br>→ proceed to<br>Stage 2
+      </div>
+    </div>""", unsafe_allow_html=True)
 
-  <!-- Stage 2 -->
-  <div style="flex:1.4;min-width:130px;background:linear-gradient(135deg,#f5f3ff,#ede9fe);
-              border:1px solid #c4b5fd;border-left:3px solid #7c3aed;padding:1rem 1rem;text-align:center;">
-    <div style="font-size:0.62rem;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;
-                color:#7c3aed;margin-bottom:5px;">Stage 2</div>
-    <div style="font-size:0.82rem;font-weight:700;color:#0f172a;margin-bottom:4px;">Confirmation</div>
-    <div style="font-size:0.7rem;color:#7c3aed;font-weight:500;margin-bottom:6px;">RF + XGBoost Ensemble</div>
-    <div style="font-size:0.67rem;color:#64748b;line-height:1.5;">G1 + G2 + trend<br>+ all Stage 1 features<br>soft voting</div>
-  </div>
+with _a3:
+    st.markdown("""
+    <div style="display:flex;align-items:center;justify-content:center;height:100%;
+                font-size:1.6rem;color:#c7d2fe;padding-top:0.5rem;">&#10142;</div>
+    """, unsafe_allow_html=True)
 
-  <!-- Arrow -->
-  <div style="display:flex;align-items:center;padding:0 4px;color:#c7d2fe;font-size:1.4rem;flex-shrink:0;">&#8250;</div>
+with _p4:
+    st.markdown("""
+    <div style="background:linear-gradient(135deg,#f5f3ff,#ede9fe);border:1px solid #c4b5fd;
+                border-top:3px solid #7c3aed;border-radius:14px;padding:1.25rem 1rem;text-align:center;height:100%;">
+      <div style="font-size:0.65rem;font-weight:800;text-transform:uppercase;
+                  letter-spacing:0.12em;color:#7c3aed;margin-bottom:6px;">Stage 2</div>
+      <div style="font-size:0.9rem;font-weight:700;color:#0f172a;margin-bottom:4px;">Confirmation</div>
+      <div style="font-size:0.75rem;color:#7c3aed;font-weight:600;margin-bottom:8px;">RF + XGBoost Ensemble</div>
+      <div style="font-size:0.71rem;color:#64748b;line-height:1.65;">G1 + G2 + grade trend<br>+ all Stage 1 features<br>
+        <span style="background:#ede9fe;color:#6d28d9;padding:1px 6px;border-radius:4px;
+                     font-weight:600;font-size:0.68rem;">soft voting</span>
+      </div>
+    </div>""", unsafe_allow_html=True)
 
-  <!-- Output -->
-  <div style="flex:1;min-width:100px;background:linear-gradient(135deg,#f0fdf4,#ecfdf5);
-              border:1px solid #a7f3d0;border-radius:0 12px 12px 0;border-left:3px solid #059669;
-              padding:1rem 1rem;text-align:center;">
-    <div style="font-size:1.25rem;margin-bottom:6px;">&#9650;</div>
-    <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#059669;margin-bottom:4px;">Output</div>
-    <div style="font-size:0.78rem;font-weight:600;color:#0f172a;">Risk Score</div>
-    <div style="font-size:0.68rem;color:#94a3b8;margin-top:3px;">+ Interventions</div>
-  </div>
+with _a4:
+    st.markdown("""
+    <div style="display:flex;align-items:center;justify-content:center;height:100%;
+                font-size:1.6rem;color:#c7d2fe;padding-top:0.5rem;">&#10142;</div>
+    """, unsafe_allow_html=True)
 
-</div>
-""", unsafe_allow_html=True)
+with _p5:
+    st.markdown("""
+    <div style="background:linear-gradient(135deg,#f0fdf4,#ecfdf5);border:1px solid #a7f3d0;
+                border-top:3px solid #059669;border-radius:14px;padding:1.25rem 1rem;text-align:center;height:100%;">
+      <div style="font-size:0.65rem;font-weight:800;text-transform:uppercase;
+                  letter-spacing:0.1em;color:#059669;margin-bottom:6px;">Output</div>
+      <div style="font-size:0.9rem;font-weight:700;color:#0f172a;margin-bottom:4px;">Risk Score</div>
+      <div style="font-size:0.72rem;color:#64748b;line-height:1.6;">High / Medium / Low<br>+ Intervention<br>recommendations</div>
+    </div>""", unsafe_allow_html=True)
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # STAGE CARDS

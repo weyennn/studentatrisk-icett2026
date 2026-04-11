@@ -1,28 +1,35 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
   <defs>
     <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#1d4ed8;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#2563eb;stop-opacity:1" />
+      <stop offset="0%" style="stop-color:#4338ca" />
+      <stop offset="100%" style="stop-color:#6366f1" />
     </linearGradient>
-    <linearGradient id="shield_grad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.15" />
-      <stop offset="100%" style="stop-color:#ffffff;stop-opacity:0.05" />
+    <linearGradient id="badge" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f59e0b" />
+      <stop offset="100%" style="stop-color:#d97706" />
     </linearGradient>
   </defs>
 
   <!-- Background circle -->
   <circle cx="100" cy="100" r="96" fill="url(#bg)" />
-  <circle cx="100" cy="100" r="96" fill="none" stroke="#3b82f6" stroke-width="2" opacity="0.5"/>
+  <circle cx="100" cy="100" r="96" fill="none" stroke="#818cf8" stroke-width="2" opacity="0.4"/>
 
-  <!-- Shield shape -->
-  <path d="M100 28 L148 50 L148 104 Q148 148 100 170 Q52 148 52 104 L52 50 Z"
-        fill="url(#shield_grad)" stroke="white" stroke-width="2.5" stroke-linejoin="round" opacity="0.9"/>
+  <!-- Person silhouette — head -->
+  <circle cx="88" cy="66" r="23" fill="white" opacity="0.95"/>
 
-  <!-- Checkmark / pulse icon inside shield -->
-  <polyline points="74,100 90,116 128,82"
-            fill="none" stroke="white" stroke-width="7"
-            stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Person silhouette — body/shoulders -->
+  <path d="M42 148 Q42 98 88 98 Q134 98 134 148 Z" fill="white" opacity="0.95"/>
 
-  <!-- Small dot accent -->
-  <circle cx="100" cy="155" r="4" fill="white" opacity="0.6"/>
+  <!-- Warning badge (bottom-right) -->
+  <circle cx="141" cy="139" r="30" fill="url(#badge)"/>
+  <circle cx="141" cy="139" r="30" fill="none" stroke="white" stroke-width="3" opacity="0.6"/>
+
+  <!-- Warning triangle outline inside badge -->
+  <polygon points="141,116 160,150 122,150"
+           fill="none" stroke="white" stroke-width="2.5"
+           stroke-linejoin="round" opacity="0.35"/>
+
+  <!-- Exclamation mark -->
+  <rect x="138.5" y="123" width="5" height="14" rx="2.5" fill="white"/>
+  <circle cx="141" cy="145" r="3" fill="white"/>
 </svg>
