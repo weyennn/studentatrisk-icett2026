@@ -59,14 +59,14 @@ with st.form("student_form"):
     st.markdown('<div class="section-label">Academic performance</div>', unsafe_allow_html=True)
     c1, c2, c3 = st.columns(3)
     with c1:
-        G1 = st.number_input("First term grade (G1)", 0, 20, 10,
-                             help="Grade 0–20. Below 10 is below the passing threshold.")
+        G1 = st.number_input("First term grade (G1)", 0, 20, 10)
+        st.markdown('<div class="field-note">Scale 0–20. Below 10 = below the passing threshold. Used as a grade trend baseline.</div>', unsafe_allow_html=True)
     with c2:
-        G2 = st.number_input("Second term grade (G2)", 0, 20, 10,
-                             help="Strongest single predictor of final outcome (importance 0.324).")
+        G2 = st.number_input("Second term grade (G2)", 0, 20, 10)
+        st.markdown('<div class="field-note top">Top predictor of final outcome (importance 0.324). Below 10 triggers a critical tutoring intervention.</div>', unsafe_allow_html=True)
     with c3:
-        failures = st.number_input("Past course failures", 0, 4, 0,
-                                   help="Number of times the student has previously failed a course.")
+        failures = st.number_input("Past course failures", 0, 4, 0)
+        st.markdown('<div class="field-note risk">Number of prior course failures. Each failure compounds risk significantly (importance 0.142).</div>', unsafe_allow_html=True)
 
     st.markdown('<hr class="divider">', unsafe_allow_html=True)
 
@@ -74,8 +74,8 @@ with st.form("student_form"):
     st.markdown('<div class="section-label">Attendance and engagement</div>', unsafe_allow_html=True)
     c4, c5, c6 = st.columns(3)
     with c4:
-        absences = st.number_input("Number of absences", 0, 93, 5,
-                                   help="Total school absences. ≥ 10 is flagged as high-risk.")
+        absences = st.number_input("Number of absences", 0, 93, 5)
+        st.markdown('<div class="field-note risk">>= 10 absences = high-risk threshold — triggers attendance counseling intervention (importance 0.186).</div>', unsafe_allow_html=True)
     with c5:
         studytime = st.selectbox("Weekly study time", [1, 2, 3, 4],
                                  format_func=lambda x: {
@@ -84,8 +84,10 @@ with st.form("student_form"):
                                      3: "5–10 hrs",
                                      4: "More than 10 hrs",
                                  }[x], index=1)
+        st.markdown('<div class="field-note">Hours studied per week outside school. Higher values are protective against academic risk.</div>', unsafe_allow_html=True)
     with c6:
         higher = st.selectbox("Aspires to higher education", ["yes", "no"])
+        st.markdown('<div class="field-note">Intention to pursue university education. A strong motivational and protective factor.</div>', unsafe_allow_html=True)
 
     st.markdown('<hr class="divider">', unsafe_allow_html=True)
 
@@ -94,63 +96,89 @@ with st.form("student_form"):
     c7, c8, c9 = st.columns(3)
     with c7:
         age = st.number_input("Age", 15, 22, 16)
+        st.markdown('<div class="field-note">Typical range 15–17. Age above the norm may indicate grade repetition.</div>', unsafe_allow_html=True)
         sex = st.selectbox("Gender", ["F", "M"],
                            format_func=lambda x: {"F": "Female", "M": "Male"}[x])
+        st.markdown('<div class="field-note">Demographic control variable. Not a primary risk driver in this dataset.</div>', unsafe_allow_html=True)
     with c8:
         Medu = st.selectbox("Mother's education level", [0, 1, 2, 3, 4],
                             format_func=lambda x: {
                                 0: "None", 1: "Primary (4th grade)",
                                 2: "Up to 9th grade", 3: "Secondary", 4: "Higher",
                             }[x], index=2)
+        st.markdown('<div class="field-note">0 = none, 4 = higher education. Combined with Fedu as the <em>parent_edu</em> feature.</div>', unsafe_allow_html=True)
         Fedu = st.selectbox("Father's education level", [0, 1, 2, 3, 4],
                             format_func=lambda x: {
                                 0: "None", 1: "Primary (4th grade)",
                                 2: "Up to 9th grade", 3: "Secondary", 4: "Higher",
                             }[x], index=2)
+        st.markdown('<div class="field-note">0 = none, 4 = higher education. Combined with Medu as the <em>parent_edu</em> feature.</div>', unsafe_allow_html=True)
     with c9:
         schoolsup = st.selectbox("School extra support", ["no", "yes"])
+        st.markdown('<div class="field-note">Extra tutoring or remedial classes from school. Combined with famsup as <em>support_total</em>.</div>', unsafe_allow_html=True)
         famsup    = st.selectbox("Family educational support", ["yes", "no"])
+        st.markdown('<div class="field-note">Educational help at home (homework, private tutoring). Combined with schoolsup as <em>support_total</em>.</div>', unsafe_allow_html=True)
 
     c10, c11, c12 = st.columns(3)
     with c10:
         school  = st.selectbox("School", ["GP", "MS"])
+        st.markdown('<div class="field-note">GP = Gabriel Pereira, MS = Mousinho da Silveira — both Portuguese secondary schools in the UCI dataset.</div>', unsafe_allow_html=True)
         address = st.selectbox("Home address type", ["U", "R"],
                                format_func=lambda x: {"U": "Urban", "R": "Rural"}[x])
+        st.markdown('<div class="field-note">Urban = better access to learning resources and shorter commute to school.</div>', unsafe_allow_html=True)
     with c11:
         famsize = st.selectbox("Family size", ["GT3", "LE3"],
                                format_func=lambda x: {"GT3": "More than 3", "LE3": "3 or fewer"}[x])
+        st.markdown('<div class="field-note">GT3 = more than 3 members, LE3 = 3 or fewer.</div>', unsafe_allow_html=True)
         Pstatus = st.selectbox("Parents living together", ["T", "A"],
                                format_func=lambda x: {"T": "Yes", "A": "No"}[x])
+        st.markdown('<div class="field-note">T = living together, A = living apart. Included as a family stability indicator.</div>', unsafe_allow_html=True)
     with c12:
         Mjob = st.selectbox("Mother's job", ["teacher", "health", "services", "at_home", "other"])
+        st.markdown('<div class="field-note">at_home = stay-at-home parent; services = civil or public sector employee.</div>', unsafe_allow_html=True)
         Fjob = st.selectbox("Father's job",  ["teacher", "health", "services", "at_home", "other"], index=4)
+        st.markdown('<div class="field-note">at_home = stay-at-home parent; services = civil or public sector employee.</div>', unsafe_allow_html=True)
 
     c13, c14, c15 = st.columns(3)
     with c13:
         reason     = st.selectbox("Reason for school choice", ["course", "home", "reputation", "other"])
+        st.markdown('<div class="field-note">course = subject preference, home = proximity, reputation = school prestige.</div>', unsafe_allow_html=True)
         guardian   = st.selectbox("Guardian", ["mother", "father", "other"])
+        st.markdown('<div class="field-note">Primary legal guardian and main point of contact for school communications.</div>', unsafe_allow_html=True)
         traveltime = st.selectbox("Travel time to school", [1, 2, 3, 4],
                                   format_func=lambda x: {
                                       1: "Less than 15 min", 2: "15–30 min",
                                       3: "30–60 min",        4: "More than 60 min",
                                   }[x])
+        st.markdown('<div class="field-note">Commutes over 30 min can affect fatigue, punctuality, and attendance.</div>', unsafe_allow_html=True)
     with c14:
         activities = st.selectbox("Extra-curricular activities", ["no", "yes"])
+        st.markdown('<div class="field-note">Sports, clubs, arts, etc. May reduce study time but can improve engagement.</div>', unsafe_allow_html=True)
         nursery    = st.selectbox("Attended nursery school", ["yes", "no"])
+        st.markdown('<div class="field-note">Attended pre-school education. An indicator of early educational investment by the family.</div>', unsafe_allow_html=True)
         internet   = st.selectbox("Internet access at home", ["yes", "no"])
+        st.markdown('<div class="field-note">Internet at home is important for homework completion and self-directed study.</div>', unsafe_allow_html=True)
     with c15:
         romantic = st.selectbox("In a romantic relationship", ["no", "yes"])
+        st.markdown('<div class="field-note">May affect available study time and overall focus.</div>', unsafe_allow_html=True)
         paid     = st.selectbox("Extra paid classes", ["no", "yes"])
+        st.markdown('<div class="field-note">Extra paid tutoring outside school. Indicates academic investment by the family.</div>', unsafe_allow_html=True)
         famrel   = st.slider("Family relationship quality", 1, 5, 4)
+        st.markdown('<div class="field-note">1 = very poor, 5 = excellent. Strong family bonds positively correlate with academic performance.</div>', unsafe_allow_html=True)
 
     c16, c17 = st.columns(2)
     with c16:
         freetime = st.slider("Free time after school", 1, 5, 3)
+        st.markdown('<div class="field-note">1 = very low, 5 = very high. Too high may signal low study commitment; too low may indicate burnout risk.</div>', unsafe_allow_html=True)
         goout    = st.slider("Going out with friends",  1, 5, 3)
+        st.markdown('<div class="field-note">1 = rarely, 5 = very frequently. High values can reduce available study time.</div>', unsafe_allow_html=True)
     with c17:
         Dalc   = st.slider("Weekday alcohol consumption", 1, 5, 1)
+        st.markdown('<div class="field-note risk">1 = none, 5 = very high. High weekday consumption is a behavioural risk indicator affecting attendance and focus.</div>', unsafe_allow_html=True)
         Walc   = st.slider("Weekend alcohol consumption", 1, 5, 2)
+        st.markdown('<div class="field-note risk">1 = none, 5 = very high. Assessed together with weekday consumption (Dalc).</div>', unsafe_allow_html=True)
         health = st.slider("Current health status", 1, 5, 3)
+        st.markdown('<div class="field-note">1 = very poor, 5 = very good. Poor health directly affects attendance and concentration.</div>', unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
     submitted = st.form_submit_button("▶  Run analysis")
@@ -280,26 +308,21 @@ if submitted:
         """, unsafe_allow_html=True)
 
     with col_f:
-      st.markdown("""
-      <div class="card" style="height:100%">
-        <div class="section-label">Top risk factors (model importance)</div>
-      """, unsafe_allow_html=True)
-
       max_imp = top_feats[0][1] if top_feats else 1
 
+      val_map = {
+          "G2": G2,
+          "G1": G1,
+          "failures": failures,
+          "grade_trend": f"{grade_trend:+d}",
+          "absences": absences,
+          "parent_edu": Medu + Fedu,
+      }
+
+      bars_html = ""
       for fname, fimp in top_feats:
           label = FEATURE_LABELS.get(fname, fname)
-
-          val_map = {
-              "G2": G2,
-              "G1": G1,
-              "failures": failures,
-              "grade_trend": f"{grade_trend:+d}",
-              "absences": absences,
-              "parent_edu": Medu + Fedu
-          }
-
-          val = val_map.get(fname, "—")
+          val   = val_map.get(fname, "—")
 
           if fname == "grade_trend":
               hint = risk_hint(fname, grade_trend)
@@ -309,19 +332,22 @@ if submitted:
           bar_w = int((fimp / max_imp) * 100)
           color = "#dc2626" if fimp / max_imp > 0.5 else ("#d97706" if fimp / max_imp > 0.25 else "#6b7280")
 
-          st.markdown(f"""
-          <div class="pbar-wrap">
-            <div class="pbar-row">
-              <span class="pbar-name">{label}</span>
-              <span class="pbar-val">value: {val} {hint} &nbsp;·&nbsp; {fimp:.3f}</span>
-            </div>
-            <div class="pbar-bg">
-              <div class="pbar-fill" style="width:{bar_w}%;background:{color};"></div>
-            </div>
-          </div>
-          """, unsafe_allow_html=True)
+          bars_html += (
+              f'<div class="pbar-wrap">'
+              f'<div class="pbar-row">'
+              f'<span class="pbar-name">{label}</span>'
+              f'<span class="pbar-val">value: {val} {hint} &nbsp;·&nbsp; {fimp:.3f}</span>'
+              f'</div>'
+              f'<div class="pbar-bg">'
+              f'<div class="pbar-fill" style="width:{bar_w}%;background:{color};"></div>'
+              f'</div>'
+              f'</div>'
+          )
 
-      st.markdown("""
+      st.markdown(f"""
+      <div class="card" style="height:100%">
+        <div class="section-label">Top risk factors (model importance)</div>
+        {bars_html}
         <div style="margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid #f3f4f6;font-size:0.72rem;color:#9ca3af;">
           Importance scores from Stage 2 RF + XGBoost ensemble.
         </div>
@@ -392,11 +418,14 @@ if submitted:
         """, unsafe_allow_html=True)
 
     else:
-        interventions = build_interventions(result, raw)
         st.markdown("""
-        <div class="card" style="border-left:3px solid #16a34a;border-radius:0 8px 8px 0;margin-top:1.5rem;">
-          <div style="font-size:0.875rem;font-weight:600;color:#15803d;margin-bottom:4px;">No immediate intervention required</div>
-          <div style="font-size:0.8rem;color:#6b7280;line-height:1.65;">
+        <div style="background:linear-gradient(135deg,#f0fdf4,#ecfdf5);border:1px solid #a7f3d0;
+                    border-left:4px solid #059669;border-radius:0 14px 14px 0;padding:1.25rem 1.5rem;margin-top:1.5rem;
+                    box-shadow:0 1px 3px rgba(5,150,105,0.08);">
+          <div style="font-size:0.92rem;font-weight:700;color:#065f46;margin-bottom:5px;">
+            &#10003; No immediate intervention required
+          </div>
+          <div style="font-size:0.8rem;color:#4b5563;line-height:1.7;">
             This student does not meet the at-risk threshold at this time.
             Continue routine monitoring and re-screen after the next assessment period.
           </div>

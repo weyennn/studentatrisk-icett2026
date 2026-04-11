@@ -2,16 +2,10 @@
 pages/about.py
 --------------
 Framework overview, methodology, and authors page.
-
-Changes from v1:
-- Feature importance values now match paper Table III exactly
-  (G2=0.324, absences=0.186, failures=0.142, grade_trend=0.118, G1=0.095)
-- Added plain-language explanation of how interventions are selected and
-  linked to risk factors (addresses reviewer comment on layman's language)
-- Intervention mapping table now shown explicitly per Table III
 """
 
 import streamlit as st
+import plotly.graph_objects as go
 from config.constants import (
     PAPER_FEATURE_IMPORTANCE,
     PAPER_INTERVENTION_MAP,
@@ -19,6 +13,12 @@ from config.constants import (
     DATASET_INFO,
     FEATURE_LABELS,
 )
+
+_FONT = "DM Sans, system-ui, sans-serif"
+_BG   = "rgba(0,0,0,0)"
+_GRID = "#f1f5f9"
+_TEXT = "#374151"
+_MUTED = "#94a3b8"
 
 # ── Page header ───────────────────────────────────────────────────────────────
 st.markdown("""
@@ -34,21 +34,97 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# ── Framework overview ────────────────────────────────────────────────────────
-st.markdown('<div class="section-label">Framework overview</div>', unsafe_allow_html=True)
+# ═══════════════════════════════════════════════════════════════════════════════
+# PIPELINE FLOW VISUAL
+# ═══════════════════════════════════════════════════════════════════════════════
+st.markdown('<div class="section-label">Detection pipeline</div>', unsafe_allow_html=True)
 
+st.markdown("""
+<div style="display:flex;align-items:stretch;gap:0;overflow-x:auto;padding-bottom:0.25rem;">
+
+  <!-- Input -->
+  <div style="flex:1;min-width:100px;background:#f8fafc;border:1px solid #e2e8f0;
+              border-radius:12px 0 0 12px;padding:1rem 1rem;text-align:center;">
+    <div style="font-size:1.25rem;margin-bottom:6px;">&#128196;</div>
+    <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#94a3b8;margin-bottom:4px;">Input</div>
+    <div style="font-size:0.78rem;font-weight:600;color:#0f172a;">Student Data</div>
+    <div style="font-size:0.68rem;color:#94a3b8;margin-top:3px;">33 features</div>
+  </div>
+
+  <!-- Arrow -->
+  <div style="display:flex;align-items:center;padding:0 4px;color:#c7d2fe;font-size:1.4rem;flex-shrink:0;">&#8250;</div>
+
+  <!-- Stage 1 -->
+  <div style="flex:1.4;min-width:130px;background:linear-gradient(135deg,#eff6ff,#eef2ff);
+              border:1px solid #c7d2fe;border-left:3px solid #4f46e5;padding:1rem 1rem;text-align:center;">
+    <div style="font-size:0.62rem;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;
+                color:#4f46e5;margin-bottom:5px;">Stage 1</div>
+    <div style="font-size:0.82rem;font-weight:700;color:#0f172a;margin-bottom:4px;">Early Screening</div>
+    <div style="font-size:0.7rem;color:#6366f1;font-weight:500;margin-bottom:6px;">Logistic Regression</div>
+    <div style="font-size:0.67rem;color:#64748b;line-height:1.5;">G1 + demographics<br>+ behaviour<br>threshold p &ge; 0.20</div>
+  </div>
+
+  <!-- Decision -->
+  <div style="display:flex;align-items:center;padding:0 4px;color:#c7d2fe;font-size:1.4rem;flex-shrink:0;">&#8250;</div>
+  <div style="flex:0.9;min-width:90px;background:linear-gradient(135deg,#fffbeb,#fef9c3);
+              border:1px solid #fde68a;border-left:3px solid #d97706;padding:1rem 0.75rem;text-align:center;
+              display:flex;flex-direction:column;align-items:center;justify-content:center;">
+    <div style="font-size:0.68rem;font-weight:700;color:#d97706;text-transform:uppercase;letter-spacing:0.08em;">Gate</div>
+    <div style="font-size:0.75rem;font-weight:600;color:#0f172a;margin-top:3px;">Flagged?</div>
+    <div style="font-size:0.65rem;color:#92400e;margin-top:4px;">p &ge; 0.20<br>→ proceed</div>
+  </div>
+
+  <!-- Arrow -->
+  <div style="display:flex;align-items:center;padding:0 4px;color:#c7d2fe;font-size:1.4rem;flex-shrink:0;">&#8250;</div>
+
+  <!-- Stage 2 -->
+  <div style="flex:1.4;min-width:130px;background:linear-gradient(135deg,#f5f3ff,#ede9fe);
+              border:1px solid #c4b5fd;border-left:3px solid #7c3aed;padding:1rem 1rem;text-align:center;">
+    <div style="font-size:0.62rem;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;
+                color:#7c3aed;margin-bottom:5px;">Stage 2</div>
+    <div style="font-size:0.82rem;font-weight:700;color:#0f172a;margin-bottom:4px;">Confirmation</div>
+    <div style="font-size:0.7rem;color:#7c3aed;font-weight:500;margin-bottom:6px;">RF + XGBoost Ensemble</div>
+    <div style="font-size:0.67rem;color:#64748b;line-height:1.5;">G1 + G2 + trend<br>+ all Stage 1 features<br>soft voting</div>
+  </div>
+
+  <!-- Arrow -->
+  <div style="display:flex;align-items:center;padding:0 4px;color:#c7d2fe;font-size:1.4rem;flex-shrink:0;">&#8250;</div>
+
+  <!-- Output -->
+  <div style="flex:1;min-width:100px;background:linear-gradient(135deg,#f0fdf4,#ecfdf5);
+              border:1px solid #a7f3d0;border-radius:0 12px 12px 0;border-left:3px solid #059669;
+              padding:1rem 1rem;text-align:center;">
+    <div style="font-size:1.25rem;margin-bottom:6px;">&#9650;</div>
+    <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#059669;margin-bottom:4px;">Output</div>
+    <div style="font-size:0.78rem;font-weight:600;color:#0f172a;">Risk Score</div>
+    <div style="font-size:0.68rem;color:#94a3b8;margin-top:3px;">+ Interventions</div>
+  </div>
+
+</div>
+""", unsafe_allow_html=True)
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# STAGE CARDS
+# ═══════════════════════════════════════════════════════════════════════════════
+st.markdown("<br>", unsafe_allow_html=True)
 col_a, col_b = st.columns(2)
+
 with col_a:
     st.markdown("""
-    <div class="card">
-      <div style="font-size:0.82rem;font-weight:600;color:#111827;margin-bottom:6px;">Stage 1 — Early Screening</div>
-      <div style="font-size:0.8rem;color:#4b5563;line-height:1.7;margin-bottom:10px;">
+    <div class="card" style="border-top:3px solid #4f46e5;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+        <div style="width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#4f46e5,#818cf8);
+                    display:flex;align-items:center;justify-content:center;
+                    font-size:0.75rem;font-weight:800;color:#fff;flex-shrink:0;">1</div>
+        <div style="font-size:0.88rem;font-weight:700;color:#0f172a;">Early Screening</div>
+      </div>
+      <div style="font-size:0.8rem;color:#4b5563;line-height:1.75;margin-bottom:12px;">
         Uses <strong>Logistic Regression</strong> on first-term data (G1 + demographics + behaviour).
         The classification threshold is deliberately set low (p &ge; 0.20) to maximise recall —
         the priority is to ensure no at-risk student is missed at this early stage, even at the
         cost of some false positives.
       </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
         <span class="hbadge">Logistic Regression</span>
         <span class="hbadge">Threshold p &ge; 0.20</span>
         <span class="hbadge success">Maximise Recall</span>
@@ -58,15 +134,20 @@ with col_a:
 
 with col_b:
     st.markdown("""
-    <div class="card">
-      <div style="font-size:0.82rem;font-weight:600;color:#111827;margin-bottom:6px;">Stage 2 — Ensemble Confirmation</div>
-      <div style="font-size:0.8rem;color:#4b5563;line-height:1.7;margin-bottom:10px;">
+    <div class="card" style="border-top:3px solid #7c3aed;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+        <div style="width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#7c3aed,#a78bfa);
+                    display:flex;align-items:center;justify-content:center;
+                    font-size:0.75rem;font-weight:800;color:#fff;flex-shrink:0;">2</div>
+        <div style="font-size:0.88rem;font-weight:700;color:#0f172a;">Ensemble Confirmation</div>
+      </div>
+      <div style="font-size:0.8rem;color:#4b5563;line-height:1.75;margin-bottom:12px;">
         Uses a <strong>Random Forest + XGBoost soft-voting ensemble</strong> on mid-term data
         (G1, G2, grade trend + all Stage 1 features). Only triggered for students flagged in
-        Stage 1. The ensemble balances precision and recall to produce a refined risk score (p₂)
+        Stage 1. Balances precision and recall to produce a refined risk score (p&#8322;)
         and identifies dominant risk factors for intervention mapping.
       </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
         <span class="hbadge accent">Random Forest</span>
         <span class="hbadge accent">XGBoost</span>
         <span class="hbadge accent">Soft Voting</span>
@@ -74,18 +155,20 @@ with col_b:
     </div>
     """, unsafe_allow_html=True)
 
-# ── Model performance ─────────────────────────────────────────────────────────
+# ═══════════════════════════════════════════════════════════════════════════════
+# MODEL PERFORMANCE
+# ═══════════════════════════════════════════════════════════════════════════════
 st.markdown('<hr class="divider">', unsafe_allow_html=True)
 st.markdown('<div class="section-label">Stage 2 ensemble performance (test set)</div>', unsafe_allow_html=True)
 
 p1, p2, p3, p4 = st.columns(4)
 metrics = [
-    ("F1-Score",  "0.88",  "Stage 2 ensemble"),
-    ("Precision", "0.88",  "Stage 2 ensemble"),
-    ("Recall",    "0.88",  "Stage 2 ensemble"),
-    ("ROC-AUC",   "0.911", "Stage 2 ensemble"),
+    ("F1-Score",  "0.88",  "Stage 2 ensemble", 0.88),
+    ("Precision", "0.88",  "Stage 2 ensemble", 0.88),
+    ("Recall",    "0.88",  "Stage 2 ensemble", 0.88),
+    ("ROC-AUC",   "0.911", "Stage 2 ensemble", 0.911),
 ]
-for col, (label, val, note) in zip([p1, p2, p3, p4], metrics):
+for col, (label, val, note, _pct) in zip([p1, p2, p3, p4], metrics):
     with col:
         st.markdown(f"""
         <div class="metric-card">
@@ -94,97 +177,198 @@ for col, (label, val, note) in zip([p1, p2, p3, p4], metrics):
           <div class="metric-note">{note}</div>
         </div>""", unsafe_allow_html=True)
 
-# ── Key risk factors & intervention mapping ────────────────────────────────────
+# ── Radar chart ───────────────────────────────────────────────────────────────
+st.markdown("<br>", unsafe_allow_html=True)
+categories = ["F1-Score", "Precision", "Recall", "ROC-AUC", "F1-Score"]
+values     = [0.88, 0.88, 0.88, 0.911, 0.88]
+
+fig_radar = go.Figure()
+fig_radar.add_trace(go.Scatterpolar(
+    r=values, theta=categories,
+    fill="toself",
+    fillcolor="rgba(99,102,241,0.15)",
+    line=dict(color="#6366f1", width=2),
+    marker=dict(size=6, color="#6366f1"),
+    hovertemplate="%{theta}: <b>%{r:.3f}</b><extra></extra>",
+    name="Stage 2 Ensemble",
+))
+fig_radar.update_layout(
+    paper_bgcolor=_BG, plot_bgcolor=_BG,
+    font=dict(family=_FONT, color=_TEXT, size=11),
+    margin=dict(l=40, r=40, t=20, b=20),
+    height=260,
+    showlegend=False,
+    polar=dict(
+        bgcolor=_BG,
+        radialaxis=dict(
+            range=[0.8, 1.0], tickvals=[0.85, 0.90, 0.95, 1.0],
+            tickfont=dict(size=10, color=_MUTED), gridcolor=_GRID,
+            linecolor=_GRID,
+        ),
+        angularaxis=dict(
+            tickfont=dict(size=11, color=_TEXT), gridcolor=_GRID, linecolor=_GRID,
+        ),
+    ),
+    hoverlabel=dict(bgcolor="#1e293b", font_color="#f1f5f9", font_family=_FONT, font_size=12),
+)
+
+col_radar, col_note = st.columns([1, 1])
+with col_radar:
+    st.markdown('<div class="card" style="padding-bottom:0.5rem;">', unsafe_allow_html=True)
+    st.plotly_chart(fig_radar, use_container_width=True, config={"displayModeBar": False})
+    st.markdown('</div>', unsafe_allow_html=True)
+
+with col_note:
+    st.markdown("""
+    <div class="card" style="height:100%;">
+      <div class="section-label">Why these metrics matter</div>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:0.25rem;">
+        <div style="padding:0.65rem 0.875rem;background:#f8fafc;border-radius:8px;border-left:3px solid #4f46e5;">
+          <div style="font-size:0.78rem;font-weight:700;color:#0f172a;margin-bottom:2px;">F1-Score 0.88</div>
+          <div style="font-size:0.73rem;color:#64748b;line-height:1.55;">Harmonic mean of precision and recall. Confirms the ensemble performs well on both dimensions.</div>
+        </div>
+        <div style="padding:0.65rem 0.875rem;background:#f8fafc;border-radius:8px;border-left:3px solid #7c3aed;">
+          <div style="font-size:0.78rem;font-weight:700;color:#0f172a;margin-bottom:2px;">ROC-AUC 0.911</div>
+          <div style="font-size:0.73rem;color:#64748b;line-height:1.55;">Probability that the model ranks a random at-risk student above a random safe one. 0.911 indicates strong discrimination.</div>
+        </div>
+        <div style="padding:0.65rem 0.875rem;background:#f8fafc;border-radius:8px;border-left:3px solid #059669;">
+          <div style="font-size:0.78rem;font-weight:700;color:#0f172a;margin-bottom:2px;">Recall 0.88</div>
+          <div style="font-size:0.73rem;color:#64748b;line-height:1.55;">Of all truly at-risk students, 88% are correctly identified. Critical metric for an early-warning system.</div>
+        </div>
+      </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# FEATURE IMPORTANCE CHART + INTERVENTION MAPPING
+# ═══════════════════════════════════════════════════════════════════════════════
 st.markdown('<hr class="divider">', unsafe_allow_html=True)
-st.markdown('<div class="section-label">Risk factors & intervention mapping (paper Table III)</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-label">Risk factors &amp; intervention mapping (paper Table III)</div>', unsafe_allow_html=True)
 
 st.markdown("""
 <div class="callout">
   <strong>How interventions are selected:</strong>&nbsp;
-  The Stage 2 ensemble extracts feature importance scores to identify which factors
-  most strongly influence a student's risk classification. These dominant factors are
-  then matched to concrete educational support actions using a rule-based mapping
-  (paper Section III-B). The table below shows this mapping — each risk factor
-  directly triggers a specific intervention when its associated threshold is exceeded.
+  The Stage 2 ensemble extracts feature importance scores to identify which factors most strongly
+  influence a student's risk classification. These dominant factors are then matched to concrete
+  educational support actions using a rule-based mapping (paper Section III-B).
 </div>
 """, unsafe_allow_html=True)
 
-# Build the mapping table from paper constants
-max_imp = PAPER_FEATURE_IMPORTANCE[0][1]
+max_imp    = PAPER_FEATURE_IMPORTANCE[0][1]
+feat_names = [FEATURE_LABELS.get(f, f) for f, _ in PAPER_FEATURE_IMPORTANCE]
+feat_vals  = [imp for _, imp in PAPER_FEATURE_IMPORTANCE]
+feat_colors = ["#4f46e5", "#6366f1", "#818cf8", "#a5b4fc", "#c7d2fe"]
 
-st.markdown("""
-<div class="card">
-  <div style="display:grid;grid-template-columns:1.8fr 0.6fr 2fr;gap:10px;
-              padding:0 0 0.5rem;margin-bottom:0.25rem;">
-    <div class="section-label" style="margin:0;">Risk factor</div>
-    <div class="section-label" style="margin:0;text-align:center;">Importance</div>
-    <div class="section-label" style="margin:0;">Recommended intervention</div>
-  </div>
-""", unsafe_allow_html=True)
+fig_imp = go.Figure()
+fig_imp.add_trace(go.Bar(
+    x=feat_vals[::-1],
+    y=feat_names[::-1],
+    orientation="h",
+    marker=dict(color=feat_colors[::-1], line=dict(width=0)),
+    text=[f"{v:.3f}" for v in feat_vals[::-1]],
+    textposition="inside",
+    textfont=dict(color="#ffffff", size=11, family=_FONT),
+    hovertemplate="%{y}<br>Importance: <b>%{x:.3f}</b><extra></extra>",
+))
+fig_imp.update_layout(
+    paper_bgcolor=_BG, plot_bgcolor=_BG,
+    font=dict(family=_FONT, color=_TEXT, size=11),
+    margin=dict(l=8, r=8, t=16, b=8),
+    height=210,
+    showlegend=False,
+    bargap=0.28,
+    xaxis=dict(
+        title="Importance score", range=[0, 0.38],
+        gridcolor=_GRID, linecolor=_GRID,
+        tickfont=dict(size=10, color=_MUTED), title_font=dict(size=10, color=_MUTED),
+    ),
+    yaxis=dict(
+        gridcolor=_GRID, linecolor=_GRID,
+        tickfont=dict(size=11, color=_TEXT),
+    ),
+    hoverlabel=dict(bgcolor="#1e293b", font_color="#f1f5f9", font_family=_FONT, font_size=12),
+)
 
-for (feat, imp), (_, intervention) in zip(PAPER_FEATURE_IMPORTANCE, PAPER_INTERVENTION_MAP):
+col_chart, col_map = st.columns([1, 1])
+with col_chart:
+    st.markdown('<div class="card">', unsafe_allow_html=True)
+    st.plotly_chart(fig_imp, use_container_width=True, config={"displayModeBar": False})
+    st.markdown("""
+    <div style="font-size:0.72rem;color:#94a3b8;padding:0 0.25rem 0.5rem;">
+      Source: Paper Table III — Stage 2 RF + XGBoost ensemble.
+    </div></div>""", unsafe_allow_html=True)
 
-    label = FEATURE_LABELS.get(feat, feat)
-    bar_w = int((imp / max_imp) * 100)
-    rank_color = "#dc2626" if imp / max_imp > 0.5 else ("#d97706" if imp / max_imp > 0.3 else "#6b7280")
+with col_map:
+    st.markdown('<div class="card">', unsafe_allow_html=True)
+    st.markdown('<div class="section-label" style="margin-bottom:0.6rem;">Intervention trigger rules</div>', unsafe_allow_html=True)
+    rank_colors = ["#dc2626", "#d97706", "#d97706", "#0284c7", "#0284c7"]
+    rank_bgs    = ["#fef2f2", "#fffbeb", "#fffbeb", "#f0f9ff", "#f0f9ff"]
+    rank_borders= ["#fca5a5", "#fde68a", "#fde68a", "#bae6fd", "#bae6fd"]
+    for i, ((feat, imp), (_, intervention)) in enumerate(
+        zip(PAPER_FEATURE_IMPORTANCE, PAPER_INTERVENTION_MAP)
+    ):
+        label = FEATURE_LABELS.get(feat, feat)
+        st.markdown(f"""
+        <div style="display:flex;align-items:flex-start;gap:10px;padding:0.55rem 0.75rem;
+                    background:{rank_bgs[i]};border:1px solid {rank_borders[i]};
+                    border-left:3px solid {rank_colors[i]};border-radius:8px;margin-bottom:6px;">
+          <div style="flex-shrink:0;width:36px;text-align:center;">
+            <div style="font-size:0.65rem;font-weight:800;color:{rank_colors[i]};
+                        text-transform:uppercase;letter-spacing:0.05em;">#{i+1}</div>
+            <div style="font-size:0.68rem;font-weight:700;color:{rank_colors[i]};
+                        font-family:'DM Mono',monospace;">{imp:.3f}</div>
+          </div>
+          <div>
+            <div style="font-size:0.77rem;font-weight:600;color:#0f172a;">{label}</div>
+            <div style="font-size:0.71rem;color:#64748b;margin-top:1px;line-height:1.45;">{intervention}</div>
+          </div>
+        </div>""", unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
 
-    st.markdown(f"""
-    <div style="display:grid;grid-template-columns:1.8fr 0.6fr 2fr;gap:10px;align-items:center;
-                padding:0.7rem 0;border-bottom:1px solid #f3f4f6;">
-      <div>
-        <div style="font-size:0.8rem;font-weight:500;color:#111827;">{label}</div>
-        <div class="pbar-bg" style="margin-top:5px;">
-          <div class="pbar-fill" style="width:{bar_w}%;background:{rank_color};"></div>
-        </div>
-      </div>
-      <div style="font-size:0.78rem;font-weight:600;color:{rank_color};
-                  font-family:'DM Mono',monospace;text-align:center;">{imp:.3f}</div>
-      <div style="font-size:0.78rem;color:#4b5563;">{intervention}</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-st.markdown("""
-  <div style="font-size:0.72rem;color:#9ca3af;margin-top:0.75rem;">
-    Source: Paper Table III — Feature importance from Stage 2 RF + XGBoost ensemble.
-  </div>
-</div>
-""", unsafe_allow_html=True)
-
-# ── Plain-language methodology ─────────────────────────────────────────────────
+# ═══════════════════════════════════════════════════════════════════════════════
+# FOR EDUCATORS
+# ═══════════════════════════════════════════════════════════════════════════════
 st.markdown('<hr class="divider">', unsafe_allow_html=True)
-st.markdown('<div class="section-label">For educators — what this framework does in plain language</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-label">For educators — plain language explanation</div>', unsafe_allow_html=True)
 
-st.markdown("""
-<div class="card">
-  <div style="font-size:0.82rem;color:#374151;line-height:1.8;">
-    <p style="margin:0 0 0.85rem;">
-      <strong>The core idea is simple:</strong> instead of waiting until the end of a school year
-      to identify struggling students, EarlyGuard raises an early flag after the first assessment
-      period — and then confirms that flag using mid-term grades before the final exam.
-    </p>
-    <p style="margin:0 0 0.85rem;">
-      <strong>Why two stages?</strong> Early data is limited, so a single early prediction can
-      generate too many false alarms. By adding a confirmation step, the framework reduces
-      unnecessary interventions while still acting early enough to make a difference.
-    </p>
-    <p style="margin:0 0 0.85rem;">
-      <strong>Why these interventions?</strong> The model learns which student characteristics
-      most reliably predict academic failure — in this dataset, the second-term grade (G2),
-      attendance record, prior failures, and grade trend between G1 and G2 are the strongest
-      signals. Each recommended intervention directly addresses the factor that raised the alarm:
-      poor G2 → tutoring; high absences → attendance counseling; prior failures → remedial support.
-    </p>
-    <p style="margin:0;">
-      <strong>How should the guidance office use this?</strong> EarlyGuard is a decision-support
-      tool, not a replacement for educator judgment. Use the risk score and factor list as a
-      starting point for a conversation with the student. The four-week protocol on the Prediction
-      page shows a recommended workflow from flagging to support plan.
-    </p>
-  </div>
-</div>
-""", unsafe_allow_html=True)
+qa_items = [
+    ("#4f46e5", "#eef2ff", "#c7d2fe",
+     "What does EarlyGuard actually do?",
+     "Instead of waiting until the end of a school year to identify struggling students, "
+     "EarlyGuard raises an early flag after the first assessment period — and then confirms "
+     "that flag using mid-term grades before the final exam."),
+    ("#7c3aed", "#f5f3ff", "#c4b5fd",
+     "Why two stages instead of one?",
+     "Early data is limited, so a single early prediction can generate too many false alarms. "
+     "By adding a confirmation step, the framework reduces unnecessary interventions while still "
+     "acting early enough to make a meaningful difference."),
+    ("#0284c7", "#f0f9ff", "#bae6fd",
+     "Why these specific interventions?",
+     "The model learns which student characteristics most reliably predict academic failure. "
+     "In this dataset, G2, attendance, prior failures, and grade trend are the strongest signals. "
+     "Each recommended intervention directly addresses the factor that raised the alarm: "
+     "poor G2 → tutoring; high absences → attendance counseling; prior failures → remedial support."),
+    ("#059669", "#f0fdf4", "#a7f3d0",
+     "How should the guidance office use this?",
+     "EarlyGuard is a decision-support tool, not a replacement for educator judgment. "
+     "Use the risk score and factor list as a starting point for a conversation with the student. "
+     "The four-week protocol on the Prediction page shows a recommended workflow from flagging to support plan."),
+]
 
-# ── Dataset info ──────────────────────────────────────────────────────────────
+col_q1, col_q2 = st.columns(2)
+for i, (border, bg, bord_col, question, answer) in enumerate(qa_items):
+    col = col_q1 if i % 2 == 0 else col_q2
+    with col:
+        st.markdown(f"""
+        <div style="background:{bg};border:1px solid {bord_col};border-left:4px solid {border};
+                    border-radius:0 12px 12px 0;padding:1rem 1.125rem;margin-bottom:0.75rem;">
+          <div style="font-size:0.82rem;font-weight:700;color:#0f172a;margin-bottom:6px;">{question}</div>
+          <div style="font-size:0.78rem;color:#475569;line-height:1.7;">{answer}</div>
+        </div>""", unsafe_allow_html=True)
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# DATASET INFO
+# ═══════════════════════════════════════════════════════════════════════════════
 st.markdown('<hr class="divider">', unsafe_allow_html=True)
 st.markdown('<div class="section-label">Dataset</div>', unsafe_allow_html=True)
 
@@ -192,49 +376,69 @@ d1, d2, d3, d4 = st.columns(4)
 for col, (label, val) in zip(
     [d1, d2, d3, d4],
     [
-        ("Dataset",    DATASET_INFO["name"]),
-        ("Subject",    DATASET_INFO["subject"]),
-        ("Students",   str(DATASET_INFO["students"])),
-        ("At-risk %",  DATASET_INFO["class_imbalance"]),
+        ("Dataset",   DATASET_INFO["name"]),
+        ("Subject",   DATASET_INFO["subject"]),
+        ("Students",  str(DATASET_INFO["students"])),
+        ("At-risk %", DATASET_INFO["class_imbalance"]),
     ]
 ):
     with col:
         st.markdown(f"""
         <div class="metric-card">
           <div class="metric-label">{label}</div>
-          <div style="font-size:0.88rem;font-weight:600;color:#111827;margin-top:4px;">{val}</div>
+          <div style="font-size:0.88rem;font-weight:700;color:#0f172a;margin-top:6px;line-height:1.3;">{val}</div>
         </div>""", unsafe_allow_html=True)
 
 st.markdown(f"""
-<div class="card-tight" style="margin-top:0.75rem;font-size:0.77rem;color:#6b7280;">
-  At-risk definition: {DATASET_INFO['at_risk_definition']}&nbsp; · &nbsp;
-  Citation: {DATASET_INFO['citation']}&nbsp; · &nbsp;
-  <a href="{DATASET_INFO['source']}" target="_blank" style="color:#2563eb;text-decoration:none;">
-    UCI Repository ↗
-  </a>
+<div class="card-tight" style="margin-top:0.75rem;font-size:0.77rem;color:#64748b;">
+  <strong style="color:#374151;">At-risk definition:</strong> {DATASET_INFO['at_risk_definition']}
+  &nbsp;&nbsp;·&nbsp;&nbsp;
+  <strong style="color:#374151;">Citation:</strong> {DATASET_INFO['citation']}
+  &nbsp;&nbsp;·&nbsp;&nbsp;
+  <a href="{DATASET_INFO['source']}" target="_blank"
+     style="color:#4f46e5;text-decoration:none;font-weight:500;">UCI Repository ↗</a>
 </div>
 """, unsafe_allow_html=True)
 
-# ── Authors ───────────────────────────────────────────────────────────────────
+# ═══════════════════════════════════════════════════════════════════════════════
+# AUTHORS
+# ═══════════════════════════════════════════════════════════════════════════════
 st.markdown('<hr class="divider">', unsafe_allow_html=True)
 st.markdown('<div class="section-label">Authors</div>', unsafe_allow_html=True)
 
+_AVATAR_COLORS = [
+    ("linear-gradient(135deg,#4f46e5,#818cf8)", "#fff"),
+    ("linear-gradient(135deg,#7c3aed,#a78bfa)", "#fff"),
+    ("linear-gradient(135deg,#0284c7,#38bdf8)", "#fff"),
+    ("linear-gradient(135deg,#059669,#34d399)", "#fff"),
+]
+
 cols = st.columns(len(AUTHORS))
-for col, author in zip(cols, AUTHORS):
+for i, (col, author) in enumerate(zip(cols, AUTHORS)):
+    bg, fg = _AVATAR_COLORS[i % len(_AVATAR_COLORS)]
+    role_html = (
+        f'<div style="font-size:0.68rem;font-weight:700;color:#6366f1;margin-top:3px;'
+        f'letter-spacing:0.03em;">Corresponding Author</div>'
+        if author["role"] else ""
+    )
     with col:
-        role_html = f'<div class="author-role">★ {author["role"]}</div>' if author["role"] else ""
         st.markdown(f"""
         <div class="author-card">
-          <div class="author-avatar">{author['initials']}</div>
+          <div style="width:52px;height:52px;border-radius:50%;background:{bg};
+                      display:flex;align-items:center;justify-content:center;
+                      margin:0 auto 12px;font-size:0.9rem;font-weight:800;color:{fg};
+                      box-shadow:0 4px 12px rgba(99,102,241,0.25);">
+            {author['initials']}
+          </div>
           <div class="author-name">{author['name']}</div>
           {role_html}
-          <div class="author-dept">{author['dept']}<br>{author['univ']}</div>
+          <div class="author-dept" style="margin-top:5px;">{author['dept']}<br>{author['univ']}</div>
           <div class="author-email">{author['email']}</div>
         </div>""", unsafe_allow_html=True)
 
 st.markdown("""
-<div class="card-tight" style="margin-top:1rem;font-size:0.77rem;color:#6b7280;text-align:center;">
-  Supported by the Indonesian Endowment Fund for Education (LPDP),
+<div class="card-tight" style="margin-top:1rem;font-size:0.77rem;color:#64748b;text-align:center;">
+  Supported by the <strong style="color:#374151;">Indonesian Endowment Fund for Education (LPDP)</strong>,
   Ministry of Education, Culture, Research, and Technology of the Republic of Indonesia.
 </div>
 """, unsafe_allow_html=True)
