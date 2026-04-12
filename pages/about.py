@@ -529,6 +529,74 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # ═══════════════════════════════════════════════════════════════════════════════
+# DEFINISI OPERASIONAL VARIABEL
+# ═══════════════════════════════════════════════════════════════════════════════
+st.markdown('<hr class="divider">', unsafe_allow_html=True)
+st.markdown('<div class="section-label">Definisi Operasional Variabel</div>', unsafe_allow_html=True)
+
+_VAR_DEFS = [
+    # (variabel, tipe, deskripsi, skala/nilai)
+    ("G1",           "Numerik",   "Nilai ujian semester pertama",                          "0 – 20"),
+    ("G2",           "Numerik",   "Nilai ujian semester kedua",                            "0 – 20"),
+    ("G3",           "Numerik",   "Nilai akhir semester (variabel target)",                "0 – 20; < 10 = at-risk"),
+    ("grade_trend",  "Turunan",   "Selisih nilai G2 − G1 (tren akademik antar semester)",  "Negatif = menurun"),
+    ("failures",     "Numerik",   "Jumlah kegagalan mata pelajaran sebelumnya",            "0 – 4"),
+    ("absences",     "Numerik",   "Jumlah hari tidak hadir dalam setahun",                 "0 – 93"),
+    ("sex",          "Kategorikal","Jenis kelamin siswa",                                  "M / F"),
+    ("famsize",      "Kategorikal","Ukuran keluarga",                                      "LE3 (≤3) / GT3 (>3)"),
+    ("internet",     "Biner",     "Akses internet di rumah",                               "yes / no"),
+    ("nursery",      "Biner",     "Pernah mengikuti pendidikan pra-sekolah (TK)",          "yes / no"),
+    ("reason",       "Kategorikal","Alasan memilih sekolah",                               "home / reputation / course / other"),
+    ("parent_edu",   "Numerik",   "Gabungan tingkat pendidikan ayah dan ibu",              "Skor komposit 0 – 8"),
+    ("support_total","Numerik",   "Gabungan dukungan sekolah dan keluarga",                "Skor komposit 0 – 4"),
+]
+
+_hdr = ["Variabel", "Tipe Data", "Deskripsi", "Skala / Nilai"]
+_hdr_html = "".join(
+    f'<th style="padding:8px 12px;text-align:left;font-size:0.72rem;font-weight:700;'
+    f'color:#64748b;text-transform:uppercase;letter-spacing:0.06em;'
+    f'border-bottom:2px solid #e2e8f0;">{h}</th>'
+    for h in _hdr
+)
+
+_rows_html = ""
+for i, (var, tipe, desc, skala) in enumerate(_VAR_DEFS):
+    _bg = "#f8fafc" if i % 2 == 0 else "#ffffff"
+    _type_colors = {
+        "Numerik":     ("#eff6ff", "#3b82f6"),
+        "Turunan":     ("#fdf4ff", "#a855f7"),
+        "Kategorikal": ("#fff7ed", "#f97316"),
+        "Biner":       ("#f0fdf4", "#22c55e"),
+    }
+    _tc_bg, _tc_fg = _type_colors.get(tipe, ("#f1f5f9", "#64748b"))
+    _rows_html += f"""
+    <tr style="background:{_bg};">
+      <td style="padding:8px 12px;font-size:0.78rem;font-weight:700;color:#0f172a;
+                 border-bottom:1px solid #f1f5f9;font-family:monospace;">{var}</td>
+      <td style="padding:8px 12px;border-bottom:1px solid #f1f5f9;">
+        <span style="background:{_tc_bg};color:{_tc_fg};font-size:0.68rem;font-weight:700;
+                     padding:2px 8px;border-radius:20px;">{tipe}</span>
+      </td>
+      <td style="padding:8px 12px;font-size:0.78rem;color:#374151;
+                 border-bottom:1px solid #f1f5f9;">{desc}</td>
+      <td style="padding:8px 12px;font-size:0.76rem;color:#64748b;
+                 border-bottom:1px solid #f1f5f9;">{skala}</td>
+    </tr>"""
+
+st.markdown(f"""
+<div class="card" style="padding:0;overflow:hidden;">
+  <table style="width:100%;border-collapse:collapse;">
+    <thead><tr style="background:#f8fafc;">{_hdr_html}</tr></thead>
+    <tbody>{_rows_html}</tbody>
+  </table>
+</div>
+<div style="font-size:0.72rem;color:#94a3b8;margin-top:6px;">
+  Sumber: UCI Student Performance Dataset (Cortez &amp; Silva, 2008).
+  G3 digunakan sebagai label; G1 dan G2 digunakan sebagai prediktor pada masing-masing stage.
+</div>
+""", unsafe_allow_html=True)
+
+# ═══════════════════════════════════════════════════════════════════════════════
 # AUTHORS
 # ═══════════════════════════════════════════════════════════════════════════════
 st.markdown('<hr class="divider">', unsafe_allow_html=True)
