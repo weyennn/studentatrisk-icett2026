@@ -532,26 +532,26 @@ st.markdown(f"""
 # DEFINISI OPERASIONAL VARIABEL
 # ═══════════════════════════════════════════════════════════════════════════════
 st.markdown('<hr class="divider">', unsafe_allow_html=True)
-st.markdown('<div class="section-label">Definisi Operasional Variabel</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-label">Operational Variable Definitions</div>', unsafe_allow_html=True)
 
 _VAR_DEFS = [
-    # (variabel, tipe, deskripsi, skala/nilai)
-    ("G1",           "Numerik",   "Nilai ujian semester pertama",                          "0 – 20"),
-    ("G2",           "Numerik",   "Nilai ujian semester kedua",                            "0 – 20"),
-    ("G3",           "Numerik",   "Nilai akhir semester (variabel target)",                "0 – 20; < 10 = at-risk"),
-    ("grade_trend",  "Turunan",   "Selisih nilai G2 − G1 (tren akademik antar semester)",  "Negatif = menurun"),
-    ("failures",     "Numerik",   "Jumlah kegagalan mata pelajaran sebelumnya",            "0 – 4"),
-    ("absences",     "Numerik",   "Jumlah hari tidak hadir dalam setahun",                 "0 – 93"),
-    ("sex",          "Kategorikal","Jenis kelamin siswa",                                  "M / F"),
-    ("famsize",      "Kategorikal","Ukuran keluarga",                                      "LE3 (≤3) / GT3 (>3)"),
-    ("internet",     "Biner",     "Akses internet di rumah",                               "yes / no"),
-    ("nursery",      "Biner",     "Pernah mengikuti pendidikan pra-sekolah (TK)",          "yes / no"),
-    ("reason",       "Kategorikal","Alasan memilih sekolah",                               "home / reputation / course / other"),
-    ("parent_edu",   "Numerik",   "Gabungan tingkat pendidikan ayah dan ibu",              "Skor komposit 0 – 8"),
-    ("support_total","Numerik",   "Gabungan dukungan sekolah dan keluarga",                "Skor komposit 0 – 4"),
+    # (variable, type, description, scale/values)
+    ("G1",           "Numeric",      "First term exam grade",                                     "0 – 20"),
+    ("G2",           "Numeric",      "Second term exam grade",                                    "0 – 20"),
+    ("G3",           "Numeric",      "Final grade (target variable)",                             "0 – 20; < 10 = at-risk"),
+    ("grade_trend",  "Derived",      "Grade change G2 − G1 (academic trend between terms)",      "Negative = declining"),
+    ("failures",     "Numeric",      "Number of past class failures",                             "0 – 4"),
+    ("absences",     "Numeric",      "Number of school absences in the year",                     "0 – 93"),
+    ("sex",          "Categorical",  "Student gender",                                            "M / F"),
+    ("famsize",      "Categorical",  "Family size",                                               "LE3 (≤3) / GT3 (>3)"),
+    ("internet",     "Binary",       "Internet access at home",                                   "yes / no"),
+    ("nursery",      "Binary",       "Attended nursery school",                                   "yes / no"),
+    ("reason",       "Categorical",  "Reason for choosing the school",                            "home / reputation / course / other"),
+    ("parent_edu",   "Numeric",      "Combined parental education level (mother + father)",       "Composite score 0 – 8"),
+    ("support_total","Numeric",      "Combined school and family support",                        "Composite score 0 – 4"),
 ]
 
-_hdr = ["Variabel", "Tipe Data", "Deskripsi", "Skala / Nilai"]
+_hdr = ["Variable", "Data Type", "Description", "Scale / Values"]
 _hdr_html = "".join(
     f'<th style="padding:8px 12px;text-align:left;font-size:0.72rem;font-weight:700;'
     f'color:#64748b;text-transform:uppercase;letter-spacing:0.06em;'
@@ -563,10 +563,10 @@ _rows_html = ""
 for i, (var, tipe, desc, skala) in enumerate(_VAR_DEFS):
     _bg = "#f8fafc" if i % 2 == 0 else "#ffffff"
     _type_colors = {
-        "Numerik":     ("#eff6ff", "#3b82f6"),
-        "Turunan":     ("#fdf4ff", "#a855f7"),
-        "Kategorikal": ("#fff7ed", "#f97316"),
-        "Biner":       ("#f0fdf4", "#22c55e"),
+        "Numeric":     ("#eff6ff", "#3b82f6"),
+        "Derived":     ("#fdf4ff", "#a855f7"),
+        "Categorical": ("#fff7ed", "#f97316"),
+        "Binary":      ("#f0fdf4", "#22c55e"),
     }
     _tc_bg, _tc_fg = _type_colors.get(tipe, ("#f1f5f9", "#64748b"))
     _rows_html += f"""
@@ -591,8 +591,8 @@ st.markdown(f"""
   </table>
 </div>
 <div style="font-size:0.72rem;color:#94a3b8;margin-top:6px;">
-  Sumber: UCI Student Performance Dataset (Cortez &amp; Silva, 2008).
-  G3 digunakan sebagai label; G1 dan G2 digunakan sebagai prediktor pada masing-masing stage.
+  Source: UCI Student Performance Dataset (Cortez &amp; Silva, 2008).
+  G3 is used as the label; G1 and G2 are used as predictors at each respective stage.
 </div>
 """, unsafe_allow_html=True)
 
