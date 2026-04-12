@@ -195,14 +195,14 @@ with col_b:
 # MODEL PERFORMANCE
 # ═══════════════════════════════════════════════════════════════════════════════
 st.markdown('<hr class="divider">', unsafe_allow_html=True)
-st.markdown('<div class="section-label">Stage 2 ensemble performance (test set)</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-label">Stage 2 ensemble performance (full test set, n=79)</div>', unsafe_allow_html=True)
 
 p1, p2, p3, p4 = st.columns(4)
 metrics = [
-    ("F1-Score",  "0.88",  "Stage 2 ensemble", 0.88),
-    ("Precision", "0.88",  "Stage 2 ensemble", 0.88),
-    ("Recall",    "0.88",  "Stage 2 ensemble", 0.88),
-    ("ROC-AUC",   "0.911", "Stage 2 ensemble", 0.911),
+    ("F1-Score",  "0.8846", "Stage 2 ensemble", 0.8846),
+    ("Precision", "0.8846", "Stage 2 ensemble", 0.8846),
+    ("Recall",    "0.8846", "Stage 2 ensemble", 0.8846),
+    ("ROC-AUC",   "0.9782", "Stage 2 ensemble", 0.9782),
 ]
 for col, (label, val, note, _pct) in zip([p1, p2, p3, p4], metrics):
     with col:
@@ -216,7 +216,7 @@ for col, (label, val, note, _pct) in zip([p1, p2, p3, p4], metrics):
 # ── Radar chart ───────────────────────────────────────────────────────────────
 st.markdown("<br>", unsafe_allow_html=True)
 categories = ["F1-Score", "Precision", "Recall", "ROC-AUC", "F1-Score"]
-values     = [0.88, 0.88, 0.88, 0.911, 0.88]
+values     = [0.8846, 0.8846, 0.8846, 0.9782, 0.8846]
 
 fig_radar = go.Figure()
 fig_radar.add_trace(go.Scatterpolar(
@@ -260,20 +260,112 @@ with col_note:
       <div class="section-label">Why these metrics matter</div>
       <div style="display:flex;flex-direction:column;gap:10px;margin-top:0.25rem;">
         <div style="padding:0.65rem 0.875rem;background:#f8fafc;border-radius:8px;border-left:3px solid #4f46e5;">
-          <div style="font-size:0.78rem;font-weight:700;color:#0f172a;margin-bottom:2px;">F1-Score 0.88</div>
+          <div style="font-size:0.78rem;font-weight:700;color:#0f172a;margin-bottom:2px;">F1-Score 0.8846</div>
           <div style="font-size:0.73rem;color:#64748b;line-height:1.55;">Harmonic mean of precision and recall. Confirms the ensemble performs well on both dimensions.</div>
         </div>
         <div style="padding:0.65rem 0.875rem;background:#f8fafc;border-radius:8px;border-left:3px solid #7c3aed;">
-          <div style="font-size:0.78rem;font-weight:700;color:#0f172a;margin-bottom:2px;">ROC-AUC 0.911</div>
-          <div style="font-size:0.73rem;color:#64748b;line-height:1.55;">Probability that the model ranks a random at-risk student above a random safe one. 0.911 indicates strong discrimination.</div>
+          <div style="font-size:0.78rem;font-weight:700;color:#0f172a;margin-bottom:2px;">ROC-AUC 0.9782</div>
+          <div style="font-size:0.73rem;color:#64748b;line-height:1.55;">Probability that the model ranks a random at-risk student above a random safe one. 0.9782 indicates strong discrimination.</div>
         </div>
         <div style="padding:0.65rem 0.875rem;background:#f8fafc;border-radius:8px;border-left:3px solid #059669;">
-          <div style="font-size:0.78rem;font-weight:700;color:#0f172a;margin-bottom:2px;">Recall 0.88</div>
+          <div style="font-size:0.78rem;font-weight:700;color:#0f172a;margin-bottom:2px;">Recall 0.8846</div>
           <div style="font-size:0.73rem;color:#64748b;line-height:1.55;">Of all truly at-risk students, 88% are correctly identified. Critical metric for an early-warning system.</div>
         </div>
       </div>
     </div>
     """, unsafe_allow_html=True)
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# BASELINE COMPARISON
+# ═══════════════════════════════════════════════════════════════════════════════
+st.markdown('<hr class="divider">', unsafe_allow_html=True)
+st.markdown('<div class="section-label">Baseline comparison (full test set, n=79)</div>', unsafe_allow_html=True)
+
+st.markdown("""
+<div class="callout">
+  <strong>Evaluation setup:</strong>&nbsp;
+  All models are trained on the same 80/20 stratified split (train=316, test=79) using Stage 2 features.
+  EarlyGuard is evaluated as a complete two-stage system — Stage 1 flags students, Stage 2 confirms risk.
+  Non-flagged students are assigned a risk probability of 0.
+</div>
+""", unsafe_allow_html=True)
+
+_baseline_data = {
+    "Model":     ["Logistic Regression", "Decision Tree", "Random Forest", "XGBoost", "SVM", "EarlyGuard (Ours)"],
+    "F1":        [0.8148, 0.8364, 0.8679, 0.8846, 0.8475, 0.8846],
+    "Precision": [0.7857, 0.7931, 0.8519, 0.8846, 0.7576, 0.8846],
+    "Recall":    [0.8462, 0.8846, 0.8846, 0.8846, 0.9615, 0.8846],
+    "AUC":       [0.9681, 0.8857, 0.9681, 0.9623, 0.9688, 0.9782],
+    "Accuracy":  [0.8734, 0.8861, 0.9114, 0.9241, 0.8861, 0.9241],
+}
+
+import pandas as pd
+
+_models  = _baseline_data["Model"]
+_is_ours = [m == "EarlyGuard (Ours)" for m in _models]
+
+_col_tbl, _col_chart = st.columns([1, 1])
+
+with _col_tbl:
+    _df = pd.DataFrame({
+        "Model":     _baseline_data["Model"],
+        "F1":        _baseline_data["F1"],
+        "Precision": _baseline_data["Precision"],
+        "Recall":    _baseline_data["Recall"],
+        "ROC-AUC":   _baseline_data["AUC"],
+        "Accuracy":  _baseline_data["Accuracy"],
+    }).set_index("Model")
+
+    def _highlight_ours(row):
+        if row.name == "EarlyGuard (Ours)":
+            return ["background-color:#eef2ff;color:#4338ca;font-weight:700"] * len(row)
+        return [""] * len(row)
+
+    def _highlight_best(col):
+        is_best = col == col.max()
+        return ["font-weight:700;color:#059669" if v else "" for v in is_best]
+
+    _styled = (
+        _df.style
+        .apply(_highlight_ours, axis=1)
+        .apply(_highlight_best, axis=0)
+        .format("{:.4f}")
+    )
+    st.dataframe(_styled, use_container_width=True)
+
+with _col_chart:
+    fig_base = go.Figure()
+    for metric, color in [("AUC", "#4f46e5"), ("F1", "#7c3aed"), ("Accuracy", "#0284c7")]:
+        fig_base.add_trace(go.Bar(
+            name=metric,
+            x=_models,
+            y=_baseline_data[metric],
+            marker_color=[color if not o else "#f59e0b" for o in _is_ours],
+            marker_line_width=0,
+            hovertemplate="%{x}<br>" + metric + ": <b>%{y:.4f}</b><extra></extra>",
+        ))
+        break  # show AUC only for clarity
+
+    fig_base.update_layout(
+        paper_bgcolor=_BG, plot_bgcolor=_BG,
+        font=dict(family=_FONT, color=_TEXT, size=11),
+        margin=dict(l=8, r=8, t=16, b=80),
+        height=280,
+        showlegend=False,
+        bargap=0.3,
+        yaxis=dict(range=[0.85, 1.0], gridcolor=_GRID, linecolor=_GRID,
+                   title="ROC-AUC", title_font=dict(size=10, color=_MUTED),
+                   tickfont=dict(size=10, color=_MUTED)),
+        xaxis=dict(gridcolor=_GRID, linecolor=_GRID,
+                   tickfont=dict(size=10, color=_TEXT), tickangle=-20),
+        hoverlabel=dict(bgcolor="#1e293b", font_color="#f1f5f9", font_family=_FONT, font_size=12),
+    )
+    st.markdown('<div class="card" style="padding-bottom:0.25rem;">', unsafe_allow_html=True)
+    st.plotly_chart(fig_base, use_container_width=True, config={"displayModeBar": False})
+    st.markdown("""
+    <div style="font-size:0.72rem;color:#94a3b8;padding:0 0.25rem 0.5rem;">
+      EarlyGuard (orange) achieves the highest ROC-AUC across all baselines.
+    </div></div>""", unsafe_allow_html=True)
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # FEATURE IMPORTANCE CHART + INTERVENTION MAPPING
